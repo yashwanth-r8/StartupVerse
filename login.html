@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+<section class="auth-layout">
+  <div class="auth-side"><div class="eyebrow">WELCOME BACK</div><h1>Your next connection is waiting.</h1><p>Log in to continue building, discovering, and growing with StartupVerse.</p><div class="auth-mini"><span>✳</span> One ecosystem. Different perspectives.</div></div>
+  <div class="auth-card"><div class="auth-card-head"><span class="auth-symbol">↗</span><div class="eyebrow">YOUR WORKSPACE</div><h2>Log in to StartupVerse</h2><p>Choose the account type you registered with.</p></div>
+    <form method="post" class="form-stack">
+      <label>Account type</label><div class="role-choice">
+        <label class="role-option"><input type="radio" name="role" value="investor" {% if selected_role == 'investor' %}checked{% endif %}><span><b>Investor</b><small>Explore startups</small></span></label>
+        <label class="role-option"><input type="radio" name="role" value="finder" {% if selected_role == 'finder' %}checked{% endif %}><span><b>Investor Finder</b><small>Find investors</small></span></label>
+      </div>
+      <label for="email">Email address</label><input id="email" name="email" type="email" placeholder="you@example.com" required autocomplete="email">
+      <label for="password">Password</label><input id="password" name="password" type="password" placeholder="Your password" required autocomplete="current-password">
+      <button class="button button-large button-full" type="submit">Log in <span>→</span></button>
+    </form>
+    <p class="auth-switch">New to StartupVerse? <a href="{{ url_for('register') }}">Create an account</a></p>
+  </div>
+</section>
+{% endblock %}

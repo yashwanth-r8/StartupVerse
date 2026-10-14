@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}StartupVerse{% endblock %} · StartupVerse</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">S</span><span>Startup<span class="brand-accent">Verse</span><small>BUILD · CONNECT · GROW</small></span></a>
+  <button class="menu-toggle" aria-label="Toggle navigation" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <nav class="nav-links">
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('patent_library') }}">Patent library</a>
+    <a href="{{ url_for('leaderboard') }}">Leaderboard</a>
+    {% if current_user %}
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('profile') }}">My profile</a>
+      {% if current_role == 'finder' %}<a href="{{ url_for('investors') }}">Find investors</a>{% else %}<a href="{{ url_for('startups') }}">Explore startups</a>{% endif %}
+      <span class="nav-user">{{ current_user }}</span>
+      <a class="button button-small button-outline" href="{{ url_for('logout') }}">Log out</a>
+    {% else %}
+      <a href="{{ url_for('login', role='investor') }}">Investor login</a>
+      <a class="button button-small" href="{{ url_for('login', role='finder') }}">Investor Finder login</a>
+    {% endif %}
+  </nav>
+</header>
+<main class="page-shell">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-stack">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+<footer class="site-footer">
+  <div><a class="brand footer-brand" href="{{ url_for('index') }}"><span class="brand-mark">S</span><span>Startup<span class="brand-accent">Verse</span></span></a><p>Connecting founders, investors, and the next big idea.</p></div>
+  <span>College project MVP · Demo matching only</span>
+</footer>
+</body>
+</html>

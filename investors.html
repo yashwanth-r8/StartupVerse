@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Find investors{% endblock %}
+{% block content %}
+<section class="page-heading"><div class="eyebrow">DISCOVERY ENGINE</div><h1>Find your investor fit.</h1><p>Matches are ranked using your saved startup profile and investor preferences.</p></section>
+<form class="search-bar" method="get"><input name="q" value="{{ query }}" placeholder="Search investor, organisation, or industry"><button class="button" type="submit">Search</button></form>
+<div class="results-note">{{ matches|length }} investor profile(s) found · Demo scores are not investment advice</div>
+{% if matches %}<div class="directory-grid">{% for m in matches %}<article class="directory-card"><div class="directory-top"><span class="summary-avatar">◈</span><span class="score-pill">{{ m.score }}% fit</span></div><h3>{{ m.organization or m.name }}</h3><div class="directory-presence"><i class="presence-dot {% if presence(m.last_active).online %}is-online{% endif %}"></i>{{ presence(m.last_active).label }}</div><p class="muted">Contact: {{ m.email }}</p><p>{{ m.bio or 'No investment thesis added yet.' }}</p><div class="tag-row">{% for industry in (m.industries or 'Any industry').split(',') %}<span class="tag">{{ industry.strip() }}</span>{% endfor %}</div><div class="directory-details"><span>Stage <b>{{ m.preferred_stage }}</b></span><span>Location <b>{{ m.location or 'Flexible' }}</b></span><span>Range <b>₹{{ '{:,.0f}'.format(m.funding_min or 0) }}–₹{{ '{:,.0f}'.format(m.funding_max or 0) }}</b></span></div>
+<form class="meeting-request-form" method="post" action="{{ url_for('request_meeting', other_user_id=m.id) }}">
+<label>Proposed meeting date/time<input type="datetime-local" name="proposed_at"></label>
+<label>Intro message<input name="message" maxlength="1000" placeholder="Introduce your startup and meeting goal"></label>
+<button class="button button-small" type="submit">Request meeting ↗</button>
+</form></article>{% endfor %}</div>{% else %}<div class="empty-state"><span>⌕</span><h3>No investor profiles found yet</h3><p>Try another search or ask a teammate to create an investor demo account and complete its profile.</p></div>{% endif %}
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Investor Finder dashboard
+<section class="panel dashboard-panel">
+  <div class="panel-heading"><div><div class="eyebrow">REAL CONNECTIONS</div><h2>Meeting room</h2></div><span class="tag">Mutual confirmation</span></div>
+  <p class="meeting-explainer">Request a conversation, accept a request, and confirm after it happens. Points reward useful activity—not simply logging in.</p>
+  {% if meetings %}
+  <div class="meeting-list">{% for meeting in meetings %}
+    <article class="meeting-card">
+      <div class="meeting-card-main"><span class="meeting-avatar">{% if current_role == 'investor' %}{{ (meeting.finder_name or 'F')[0]|upper }}{% else %}{{ (meeting.investor_name or 'I')[0]|upper }}{% endif %}</span>
+        <div class="meeting-info"><h3>{% if current_role == 'investor' %}{{ meeting.finder_name }}{% else %}{{ meeting.investor_name }}{% endif %}</h3>
+          <p>{{ meeting.proposed_at or 'Time to be agreed' }} · {{ meeting.status }}</p>
+          {% if meeting.message %}<small>{{ meeting.message }}</small>{% endif %}
+          {% if meeting.status == 'Accepted' %}<small>Confirmations: investor {{ '✓' if meeting.investor_confirmed else 'pending' }} · founder {{ '✓' if meeting.finder_confirmed else 'pending' }}</small>{% endif %}
+        </div>
+      </div>
+      <div class="meeting-actions">
+      {% if meeting.status == 'Requested' and meeting.requested_by != session.get('user_id') %}
+        <form method="post" action="{{ url_for('respond_meeting', meeting_id=meeting.id) }}"><input type="hidden" name="action" value="Accepted"><button class="button button-small" type="submit">Accept</button></form>
+        <form method="post" action="{{ url_for('respond_meeting', meeting_id=meeting.id) }}"><input type="hidden" name="action" value="Declined"><button class="button button-small button-outline" type="submit">Decline</button></form>
+      {% elif meeting.status == 'Accepted' and ((current_role == 'investor' and not meeting.investor_confirmed) or (current_role == 'finder' and not meeting.finder_confirmed)) %}
+        <form method="post" action="{{ url_for('confirm_meeting', meeting_id=meeting.id) }}"><button class="button button-small" type="submit">Confirm completed</button></form>
+      {% endif %}
+      </div>
+    </article>
+  {% endfor %}</div>
+  {% else %}<div class="empty-inline">No meeting requests yet. Find a profile to request your first meeting.</div>{% endif %}
+</section>
+
+{% endblock %}
+{% block content %}
+<section class="dashboard-welcome"><div><div class="eyebrow">FOUNDER WORKSPACE</div><h1>Let's move your idea forward, {{ current_user.split(' ')[0] }}.</h1><p>Keep your startup details current and explore investors that fit your goals.</p></div><a class="button" href="{{ url_for('profile') }}">Edit startup profile <span>→</span></a></section>
+
+<div class="reputation-strip">
+  <div class="rep-main"><span class="rep-badge">✦</span><div><small>STARTUPVERSE REPUTATION</small><strong>{{ account.trust_score }}/100</strong><p>Platform trust score · not a financial credit score</p></div></div>
+  <div class="rep-stat"><small>ACTIVITY POINTS</small><strong>{{ account.activity_points }} XP</strong><span>Earned through useful actions</span></div>
+  <div class="rep-stat"><small>LOGIN ACTIVITY</small><strong class="presence-inline"><i class="presence-dot {% if presence(account.last_active).online %}is-online{% endif %}"></i>{{ presence(account.last_active).label }}</strong><span>Based on last authenticated activity</span></div>
+  <a class="text-link rep-leaderboard" href="{{ url_for('leaderboard') }}">Leaderboard →</a>
+</div>
+
+<div class="stat-grid"><div class="stat-card"><span>YOUR STARTUP</span><strong>{{ profile.startup_name or 'Not named yet' }}</strong><small>Startup profile</small></div><div class="stat-card"><span>INVESTOR MATCHES</span><strong>{{ matches|length }}</strong><small>Based on profile fit</small></div><div class="stat-card"><span>OPEN TASKS</span><strong>{{ tasks|selectattr('status', 'ne', 'Completed')|list|length }}</strong><small>Compliance reminders</small></div></div>
+<section class="panel dashboard-panel"><div class="panel-heading"><div><div class="eyebrow">STARTUP PROFILE</div><h2>Your venture at a glance</h2></div><a class="text-link" href="{{ url_for('profile') }}">Edit profile →</a></div>
+{% if profile.startup_name %}
+<div class="profile-summary"><div class="summary-main"><span class="summary-avatar">↗</span><div><h3>{{ profile.startup_name }}</h3><p>{{ profile.description or 'Add a description so investors can understand your idea.' }}</p></div></div><div class="tag-row"><span class="tag">{{ profile.industry or 'Industry not set' }}</span><span class="tag">{{ profile.stage }}</span><span class="tag">{{ profile.location or 'Location not set' }}</span></div><p class="muted">Funding target: ₹{{ '{:,.0f}'.format(profile.funding_needed or 0) }}</p></div>
+{% else %}<div class="empty-state"><span>↗</span><h3>Tell the ecosystem about your startup</h3><p>Add your startup name, industry, stage, location, and funding target to calculate demo matches.</p><a class="button" href="{{ url_for('profile') }}">Complete startup profile</a></div>{% endif %}
+</section>
+<section class="panel dashboard-panel"><div class="panel-heading"><div><div class="eyebrow">DISCOVERY</div><h2>Top investor matches</h2></div><a class="text-link" href="{{ url_for('investors') }}">View all matches →</a></div>
+{% if matches %}
+<div class="match-list">{% for m in matches[:3] %}<article class="match-row"><div class="match-avatar">{{ (m.organization or m.name)[0]|upper }}</div><div class="match-info"><h3>{{ m.organization or m.name }}</h3><p>{{ m.industries or 'Industries not listed' }} · {{ m.location or 'Location flexible' }}</p><small>Stage preference: {{ m.preferred_stage }}</small></div><div class="match-score"><strong>{{ m.score }}%</strong><span>demo fit</span></div></article>{% endfor %}</div>
+{% else %}<div class="empty-state compact"><span>⌕</span><h3>Matches appear when investors join</h3><p>Register a separate investor account and complete its investment profile to test matching.</p></div>{% endif %}
+</section>
+<section class="panel dashboard-panel"><div class="panel-heading"><div><div class="eyebrow">STAY ORGANISED</div><h2>Compliance task tracker</h2></div><span class="tag">User-managed reminders</span></div>
+<form class="task-add" method="post" action="{{ url_for('add_task') }}"><div class="field"><label for="task-title">Task name</label><input id="task-title" name="title" placeholder="e.g. Review company registration documents" required></div><div class="field"><label for="due-date">Due date</label><input id="due-date" type="date" name="due_date"></div><button class="button" type="submit">Add task +</button></form>
+{% if tasks %}<div class="task-list">{% for task in tasks %}<div class="task-row"><div class="task-check {% if task.status == 'Completed' %}task-done{% endif %}">{% if task.status == 'Completed' %}✓{% else %}○{% endif %}</div><div class="task-info"><b>{{ task.title }}</b><small>{% if task.due_date %}Due {{ task.due_date }}{% else %}No due date{% endif %}</small></div><form method="post" action="{{ url_for('update_task', task_id=task.id) }}"><select name="status" aria-label="Task status" onchange="this.form.submit()">{% for s in ['Pending','In Progress','Completed'] %}<option {% if task.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></form><form method="post" action="{{ url_for('delete_task', task_id=task.id) }}" onsubmit="return confirm('Delete this task?')"><button class="icon-button" aria-label="Delete task" title="Delete task">×</button></form></div>{% endfor %}</div>{% else %}<div class="empty-inline">No tasks yet. Add your first reminder above.</div>{% endif %}
+<p class="disclaimer">These are personal reminders only. StartupVerse does not verify legal obligations or provide legal advice.</p>
+</section>
+{% endblock %}

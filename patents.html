@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Patent landscape library{% endblock %}
+{% block content %}
+<section class="page-heading patent-page-heading">
+  <div class="eyebrow">PATENT LANDSCAPE · PUBLIC RECORDS</div>
+  <h1>Innovation, mapped.</h1>
+  <p>Explore selected patent publications and grants published from 14 October 2024 through 14 October 2026, focused on venture discovery, investment analysis, regulatory compliance, and adjacent workflow technologies.</p>
+  <div class="patent-stat-line"><span><b>{{ total }}</b> curated records</span><span>Publication window: <b>14 Oct 2024 – 14 Oct 2026</b></span><a class="text-link" href="{{ url_for('patent_export') }}">Export full dataset CSV ↓</a></div>
+</section>
+<section class="patent-research-note">
+  <div class="research-note-mark">i</div>
+  <div><b>Research scope and accuracy</b><p>This is a selected research dataset, not a guaranteed exhaustive global search or a legal opinion. Patent status and assignee fields shown by aggregators may be incomplete or assumed. Verify the latest status in the relevant official patent office register before relying on it.</p></div>
+</section>
+<form method="get" class="patent-filters panel">
+  <div class="field search-field"><label for="patent-q">Search records</label><input id="patent-q" name="q" value="{{ q }}" placeholder="Title, publication number, inventor, assignee, keywords…"></div>
+  <div class="field"><label for="category">Technology area</label><select id="category" name="category"><option value="">All areas</option>{% for item in categories %}<option value="{{ item }}" {% if category == item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="jurisdiction">Jurisdiction</label><select id="jurisdiction" name="jurisdiction"><option value="">All jurisdictions</option>{% for item in jurisdictions %}<option value="{{ item }}" {% if jurisdiction == item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="doc_type">Document type</label><select id="doc_type" name="doc_type"><option value="">All types</option><option value="Application" {% if doc_type == 'Application' %}selected{% endif %}>Application / publication</option><option value="Granted patent" {% if doc_type == 'Granted patent' %}selected{% endif %}>Granted patent</option></select></div>
+  <div class="field"><label for="status">Status label</label><select id="status" name="status"><option value="">All statuses</option><option value="pending" {% if status|lower == 'pending' %}selected{% endif %}>Pending label</option><option value="active" {% if status|lower == 'active' %}selected{% endif %}>Active label</option><option value="granted" {% if status|lower == 'granted' %}selected{% endif %}>Granted / family</option><option value="verify" {% if status|lower == 'verify' %}selected{% endif %}>Requires verification</option></select></div>
+  <div class="field"><label for="year">Publication year</label><select id="year" name="year"><option value="">All years</option>{% for item in years %}<option value="{{ item }}" {% if year == item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
+  <div class="patent-filter-actions"><button class="button" type="submit">Apply filters</button><a class="button button-outline" href="{{ url_for('patent_library') }}">Reset</a></div>
+</form>
+<div class="results-note">{{ patents|length }} record(s) match your filters. Click any record for full metadata and research notes.</div>
+{% if patents %}
+<div class="patent-grid">
+{% for p in patents %}
+<article class="patent-card">
+  <div class="patent-card-top"><span class="patent-number">{{ p.id }}</span><span class="patent-kind {% if p.type_group == 'Granted patent' %}kind-granted{% endif %}">{{ p.kind }}</span></div>
+  <h2><a href="{{ url_for('patent_detail', patent_id=p.id) }}">{{ p.title }}</a></h2>
+  <div class="patent-meta-row"><span>{{ p.jurisdiction }}</span><span>Published {{ p.publication_date }}</span></div>
+  <p>{{ p.abstract }}</p>
+  <div class="patent-tag-row"><span class="tag">{{ p.category }}</span><span class="tag">{{ p.type_group }}</span></div>
+  <div class="patent-assignee"><small>Assignee / applicant</small><b>{{ p.assignee }}</b></div>
+  <div class="patent-card-bottom"><span class="status-label">{{ p.status }}</span><a class="text-link" href="{{ url_for('patent_detail', patent_id=p.id) }}">Full details →</a></div>
+</article>
+{% endfor %}
+</div>
+{% else %}
+<div class="empty-state"><span>⌕</span><h3>No records match these filters</h3><p>Try a broader keyword or clear some filters.</p><a class="button" href="{{ url_for('patent_library') }}">Clear filters</a></div>
+{% endif %}
+<section class="patent-type-guide panel">
+  <div class="eyebrow">HOW TO READ PATENT DOCUMENTS</div><h2>Application, publication, grant: what's the difference?</h2>
+  <div class="patent-guide-grid">
+    <div><b>A1 / A publications</b><p>Usually identify a published application. Publication alone does not mean the claims were granted.</p></div>
+    <div><b>B / B2 grant documents</b><p>Identify granted-patent documents in many patent systems. Confirm the current legal status and maintenance events with the official register.</p></div>
+    <div><b>WO / PCT publications</b><p>Published through the international PCT system. A PCT publication is not a single “world patent”; national or regional phases are separate.</p></div>
+    <div><b>Priority vs. filing vs. publication</b><p>Priority is an earliest claimed filing date, filing is the application date, and publication is when the document became public. These dates can differ substantially.</p></div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Community leaderboard{% endblock %}
+{% block content %}
+<section class="page-heading"><div class="eyebrow">COMMUNITY REPUTATION</div><h1>Progress earns recognition.</h1><p>Activity points reward constructive participation. Reputation is an internal platform indicator—not a financial credit score or a guarantee of reliability.</p></section>
+<section class="panel leaderboard-panel">
+<div class="leaderboard-head"><span>RANK / MEMBER</span><span>ACTIVITY</span><span>REPUTATION</span><span>STATUS</span></div>
+{% for person in leaders %}
+<div class="leaderboard-row">
+<div class="leader-person"><span class="leader-rank">{% if loop.index == 1 %}♛{% else %}{{ "%02d"|format(loop.index) }}{% endif %}</span><span class="leader-avatar">{{ (person.display_name or person.name)[0]|upper }}</span><div><b>{{ person.display_name or person.name }}</b><small>{{ 'Investor' if person.role == 'investor' else 'Investor Finder' }}</small></div></div>
+<strong class="leader-xp">{{ person.activity_points }} XP</strong>
+<div class="leader-rep"><b>{{ person.trust_score }}/100</b><span class="rep-meter"><i style="width:{{ person.trust_score }}%"></i></span></div>
+<span class="presence-inline"><i class="presence-dot {% if presence(person.last_active).online %}is-online{% endif %}"></i>{{ presence(person.last_active).label }}</span>
+</div>
+{% else %}<div class="empty-state"><h3>No community members yet</h3><p>Create an account to begin.</p></div>{% endfor %}
+</section>
+<section class="panel points-guide"><div class="eyebrow">HOW POINTS WORK</div><h2>Earn XP by building momentum.</h2>
+<div class="points-grid">
+<div><span>+10 XP</span><b>Create account</b><p>One-time signup reward.</p></div>
+<div><span>+20 XP / +5 reputation</span><b>Complete profile</b><p>First time key profile fields are completed.</p></div>
+<div><span>+2 XP</span><b>Send meeting request</b><p>Duplicate open requests are blocked.</p></div>
+<div><span>+3 XP / +2 reputation</span><b>Accept meeting</b><p>Reward for accepting a request.</p></div>
+<div><span>+10 XP / +5 reputation</span><b>Meeting completed</b><p>Both participants confirm; each receives the reward once.</p></div>
+</div><p class="disclaimer">This is an internal demo score, not a credit bureau score. Declining a meeting never deducts points. A production version should add verification, abuse reporting, privacy controls, and anti-gaming rules.</p>
+</section>
+{% endblock %}

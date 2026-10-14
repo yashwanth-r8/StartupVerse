@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Explore startups{% endblock %}
+{% block content %}
+<section class="page-heading"><div class="eyebrow">STARTUP DIRECTORY</div><h1>Ideas in motion.</h1><p>Explore startup profiles shared by Investor Finder accounts.</p></section>
+<form class="search-bar" method="get"><input name="q" value="{{ query }}" placeholder="Search startup name or industry"><button class="button" type="submit">Search</button></form>
+<div class="results-note">{{ startups|length }} startup profile(s) found</div>
+{% if startups %}<div class="directory-grid">{% for s in startups %}<article class="directory-card"><div class="directory-top"><span class="summary-avatar">↗</span><span class="tag">{{ s.stage }}</span></div><h3>{{ s.startup_name or 'Untitled startup' }}</h3><div class="directory-presence"><i class="presence-dot {% if presence(s.founder_last_active).online %}is-online{% endif %}"></i>{{ presence(s.founder_last_active).label }}</div><p class="muted">Founder: {{ s.founder }}</p><p>{{ s.description or 'No description added yet.' }}</p><div class="tag-row"><span class="tag">{{ s.industry or 'Industry not set' }}</span><span class="tag">{{ s.location or 'Location not set' }}</span></div><div class="directory-details"><span>Funding target <b>₹{{ '{:,.0f}'.format(s.funding_needed or 0) }}</b></span></div>
+<form class="meeting-request-form" method="post" action="{{ url_for('request_meeting', other_user_id=s.user_id) }}">
+<label>Proposed meeting date/time<input type="datetime-local" name="proposed_at"></label>
+<label>Intro message<input name="message" maxlength="1000" placeholder="Why would you like to meet?"></label>
+<button class="button button-small" type="submit">Request meeting ↗</button>
+</form></article>{% endfor %}</div>{% else %}<div class="empty-state"><span>✳</span><h3>No other startup profiles yet</h3><p>Startup profiles from other Investor Finder accounts will appear here.</p></div>{% endif %}
+{% endblock %}

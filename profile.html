@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}My profile{% endblock %}
+{% block content %}
+<section class="page-heading"><div class="eyebrow">YOUR INFORMATION</div><h1>{% if role == 'investor' %}Investor profile{% else %}Startup profile{% endif %}</h1><p>Complete these details to make matching more useful.</p></section>
+<form method="post" class="panel form-panel">
+{% if role == 'investor' %}
+  <div class="form-grid">
+    <div class="field"><label for="organization">Fund / organisation</label><input id="organization" name="organization" value="{{ profile.organization }}" placeholder="e.g. Greenfield Ventures"></div>
+    <div class="field"><label for="industries">Industries</label><input id="industries" name="industries" value="{{ profile.industries }}" placeholder="e.g. FinTech, AI, Healthcare"><small>Comma-separated; enter Any to match all industries.</small></div>
+    <div class="field"><label for="funding_min">Minimum investment (₹)</label><input id="funding_min" name="funding_min" type="number" min="0" step="1000" value="{{ profile.funding_min }}"></div>
+    <div class="field"><label for="funding_max">Maximum investment (₹)</label><input id="funding_max" name="funding_max" type="number" min="0" step="1000" value="{{ profile.funding_max }}"></div>
+    <div class="field"><label for="preferred_stage">Preferred startup stage</label><select id="preferred_stage" name="preferred_stage">{% for s in ['Any','Idea','Prototype','MVP','Early Revenue','Growth'] %}<option {% if profile.preferred_stage == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="location">Preferred location</label><input id="location" name="location" value="{{ profile.location }}" placeholder="e.g. Tamil Nadu"></div>
+    <div class="field field-wide"><label for="bio">About you / investment thesis</label><textarea id="bio" name="bio" rows="4" placeholder="What kind of founders and ideas interest you?">{{ profile.bio }}</textarea></div>
+  </div>
+{% else %}
+  <div class="form-grid">
+    <div class="field"><label for="startup_name">Startup name</label><input id="startup_name" name="startup_name" value="{{ profile.startup_name }}" placeholder="Your venture name" required></div>
+    <div class="field"><label for="industry">Industry</label><input id="industry" name="industry" value="{{ profile.industry }}" placeholder="e.g. FinTech, AI, Healthcare"></div>
+    <div class="field"><label for="funding_needed">Funding needed (₹)</label><input id="funding_needed" name="funding_needed" type="number" min="0" step="1000" value="{{ profile.funding_needed }}"></div>
+    <div class="field"><label for="stage">Startup stage</label><select id="stage" name="stage">{% for s in ['Idea','Prototype','MVP','Early Revenue','Growth'] %}<option {% if profile.stage == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="location">Location</label><input id="location" name="location" value="{{ profile.location }}" placeholder="e.g. Tamil Nadu"></div>
+    <div class="field field-wide"><label for="description">Startup description</label><textarea id="description" name="description" rows="5" placeholder="What problem are you solving?">{{ profile.description }}</textarea></div>
+  </div>
+{% endif %}
+  <div class="form-actions"><a class="button button-outline" href="{{ url_for('dashboard') }}">Cancel</a><button class="button" type="submit">Save profile <span>→</span></button></div>
+</form>
+{% endblock %}
